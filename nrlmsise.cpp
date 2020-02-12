@@ -9,119 +9,141 @@
 // I'm only going to check status on things that might be reasonably expected to fail...
 
 char msg[100];
+//#define DEBUG
 
 const char* type_name(napi_valuetype vt);
 
 napi_value wrap_gt7d(napi_env env, napi_callback_info info) {
 
 	int n;
+	#define ARGCOUNT 41
 
 	// Set up the nrlmsise structures
 	struct nrlmsise_output output;
 	struct nrlmsise_input input;
 	struct nrlmsise_flags flags;
+	struct ap_array ap_array;
+	input.ap_a=&ap_array;
 
 	// A place to store the args
-	size_t argc=34;
-	napi_value args[34];
+	size_t argc=ARGCOUNT;
+	napi_value args[ARGCOUNT];
 
-  	// Get arguments
+	// Get arguments
 	napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
 
 	// Verify total argument count
-  	if(argc != 41) {
-  		napi_throw_type_error(env, nullptr, "Wrong number of arguments");
-  		return nullptr;
-  	}
+	if(argc != ARGCOUNT) {
+		napi_throw_type_error(env, nullptr, "Wrong number of arguments");
+		return nullptr;
+	}
 
 	// Make sure switch arguments look right, and get them
-  	for(n=0; n<24; n++) {
+	for(n=0; n<24; n++) {
 
-	  	napi_valuetype vt;
-  		assert(napi_ok==napi_typeof(env, args[n], &vt));
-  		
+		napi_valuetype vt;
+		assert(napi_ok==napi_typeof(env, args[n], &vt));
+		
+		if(vt != napi_number) {
 
-  		if(vt != napi_boolean) {
+			sprintf(msg,"Argument %d is of type %s, should be Number",n, type_name(vt));
+			napi_throw_type_error(env, nullptr, msg);
+			return nullptr;
+		}
 
-  			//std::string msg ("Switches must be boolean");// + std::to_string(n);
-  			sprintf(msg,"Switches must be boolean (switch %d is of type %s)",n, type_name(vt));
-  			napi_throw_type_error(env, nullptr, msg);
-  			return nullptr;
-  		}
+		int32_t sw;
+		napi_get_value_int32(env, args[n], &sw);
+		flags.switches[n]=(int)sw;
 
-		bool sw;
-  		napi_get_value_bool(env, args[n], &sw);
-		flags.switches[n]=sw?1:0;
-  	}
+		#ifdef DEBUG
+		printf("switch %d=%d\n",n,sw);
+		#endif
+	}
 
 	// Make sure the normal arguments look right, and get them
-  	for(n=24; n<34; n++) {
+	for(n=24; n<41; n++) {
 
-	  	napi_valuetype vt;
-  		assert(napi_ok==napi_typeof(env, args[n], &vt));
+		napi_valuetype vt;
+		assert(napi_ok==napi_typeof(env, args[n], &vt));
 
-  		if(vt != napi_number) {
+		#ifdef DEBUG
+		printf("param %d type is %d : ",n,vt);
+		#endif
 
-  			//std::string msg ("Switches must be boolean");// + std::to_string(n);
-  			sprintf(msg,"Argument %d is of type %s, should be Number",n, type_name(vt));
-  			napi_throw_type_error(env, nullptr, msg);
-  			return nullptr;
-  		}
+
+		if(vt != napi_number) {
+			sprintf(msg,"Argument %d is of type %s, should be Number",n, type_name(vt));
+			napi_throw_type_error(env, nullptr, msg);
+			return nullptr;
+		}
 
 		double param;
-  		napi_get_value_double(env, args[n], &param);
+		assert(napi_ok==napi_get_value_double(env, args[n], &param));
 
-  		switch(n){
+		#ifdef DEBUG
+		printf("value = %f\n",param);
+		#endif
 
-  			case 24: input.year=(int)param;	// Currently ignored
-  			case 25: input.doy=(int)param;
-  			case 26: input.sec=param;
-  			case 27: input.alt=param;
-  			case 28: input.g_lat=param;
-  			case 29: input.g_long=param;
-  			case 30: input.lst=param;
-  			case 31: input.f107A=param;
-  			case 32: input.f107=param;
-  		}
-  	}
+		switch(n){
+
+			case 24: input.year=(int)param;	break;// Currently ignored
+			case 25: input.doy=(int)param;	break;
+			case 26: input.sec=param;		break;
+			case 27: input.alt=param;		break;
+			case 28: input.g_lat=param;		break;
+			case 29: input.g_long=param;	break;
+			case 30: input.lst=param;		break;
+			case 31: input.f107A=param;		break;
+			case 32: input.f107=param;		break;
+			case 33: input.ap=param;		break;
+			case 34:
+			case 35:
+			case 36:
+			case 37:
+			case 38:
+			case 39:
+			case 40: 
+					ap_array.a[n-34]=param;	break;
+		}
+	}
 
 
 
-  	// Call gtd7
+	// Call gtd7
 	gtd7(&input, &flags, &output);
 
 	// Build the output object
-  	napi_value obj;
-  	assert(napi_ok==napi_create_object(env, &obj));
+	napi_value obj;
+	assert(napi_ok==napi_create_object(env, &obj));
 
-  	// Get densities
-  	napi_value d;
-  	for (n=0; n<9; n++){
-  		assert(napi_ok==napi_create_double(env, output.d[n], &d));
-  		switch(n){
-  			case 0:	napi_set_named_property(env, obj, "HE", d);
-  			case 1:	napi_set_named_property(env, obj, "O", d);
-  			case 2:	napi_set_named_property(env, obj, "N2", d);
-  			case 3:	napi_set_named_property(env, obj, "O2", d);
-  			case 4:	napi_set_named_property(env, obj, "AR", d);
-  			case 5:	napi_set_named_property(env, obj, "total", d);
-  			case 6:	napi_set_named_property(env, obj, "H", d);
-  			case 7:	napi_set_named_property(env, obj, "N", d);
-  			case 8:	napi_set_named_property(env, obj, "anomalous_oxygen", d);
-  		}
-  	}
+	// Get densities
+	napi_value d;
+	for (n=0; n<9; n++){
+		assert(napi_ok==napi_create_double(env, output.d[n], &d));
+		switch(n){
+			case 0:	napi_set_named_property(env, obj, "HE", d);
+			case 1:	napi_set_named_property(env, obj, "O", d);
+			case 2:	napi_set_named_property(env, obj, "N2", d);
+			case 3:	napi_set_named_property(env, obj, "O2", d);
+			case 4:	napi_set_named_property(env, obj, "AR", d);
+			case 5:	napi_set_named_property(env, obj, "total", d);
+			case 6:	napi_set_named_property(env, obj, "H", d);
+			case 7:	napi_set_named_property(env, obj, "N", d);
+			case 8:	napi_set_named_property(env, obj, "anomalous_oxygen", d);
+		}
+	}
 
-  	napi_value t;
-  	for (n=0; n<2; n++){
-  		assert(napi_ok==napi_create_double(env, output.t[n], &t));
-  		switch(n){
-  			case 0:	napi_set_named_property(env, obj, "exospheric_temperature", t);
-  			case 1:	napi_set_named_property(env, obj, "temperature", t);
-  		}
-  	}
+	napi_value t;
+	for (n=0; n<2; n++){
+		assert(napi_ok==napi_create_double(env, output.t[n], &t));
+		switch(n){
+			case 0:	napi_set_named_property(env, obj, "exospheric_temperature", t);
+			case 1:	napi_set_named_property(env, obj, "temperature", t);
+		}
+	}
 
 
-  	return obj;
+	return obj;
 }
 
 #define DECLARE_NAPI_METHOD(name, func)  {name, 0, func, 0, 0, 0, napi_default, 0 }

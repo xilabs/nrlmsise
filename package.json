@@ -2,7 +2,7 @@
   "name": "nrlmsise",
   "version": "1.0.0",
   "description": "",
-  "main": "module.js",
+  "main": "index.js",
   "scripts": {
     "start": "node-gyp configure build",
     "install": "node-gyp rebuild",
