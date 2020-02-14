@@ -13,7 +13,7 @@ char msg[100];
 
 const char* type_name(napi_valuetype vt);
 
-napi_value wrap_gt7d(napi_env env, napi_callback_info info) {
+napi_value wrap_gt7(napi_env env, napi_callback_info info) {
 
 	int n;
 	#define ARGCOUNT 41
@@ -60,6 +60,7 @@ napi_value wrap_gt7d(napi_env env, napi_callback_info info) {
 		#endif
 	}
 
+
 	// Make sure the normal arguments look right, and get them
 	for(n=24; n<41; n++) {
 
@@ -86,8 +87,8 @@ napi_value wrap_gt7d(napi_env env, napi_callback_info info) {
 
 		switch(n){
 
-			case 24: input.year=(int)param;	break;// Currently ignored
-			case 25: input.doy=(int)param;	break;
+			case 24: input.doy=(int)param;	break;
+			case 25: input.year=(int)param;	break;// Currently ignored
 			case 26: input.sec=param;		break;
 			case 27: input.alt=param;		break;
 			case 28: input.g_lat=param;		break;
@@ -112,35 +113,53 @@ napi_value wrap_gt7d(napi_env env, napi_callback_info info) {
 	// Call gtd7
 	gtd7(&input, &flags, &output);
 
+	// #ifdef DEBUG
+	// int j;
+	// for (j=0;j<9;j++)
+	// 	printf("%E ",output.d[j]);
+	// #endif
+
+
 	// Build the output object
 	napi_value obj;
 	assert(napi_ok==napi_create_object(env, &obj));
 
+	// A value to use for holding values
+	napi_value val;
+
+
 	// Get densities
 	napi_value d;
+	assert(napi_ok==napi_create_array_with_length(env, 9, &d));
 	for (n=0; n<9; n++){
-		assert(napi_ok==napi_create_double(env, output.d[n], &d));
+		assert(napi_ok==napi_create_double(env, output.d[n], &val));
+		assert(napi_ok==napi_set_element(env, d, n, val));
 		switch(n){
-			case 0:	napi_set_named_property(env, obj, "HE", d);
-			case 1:	napi_set_named_property(env, obj, "O", d);
-			case 2:	napi_set_named_property(env, obj, "N2", d);
-			case 3:	napi_set_named_property(env, obj, "O2", d);
-			case 4:	napi_set_named_property(env, obj, "AR", d);
-			case 5:	napi_set_named_property(env, obj, "total", d);
-			case 6:	napi_set_named_property(env, obj, "H", d);
-			case 7:	napi_set_named_property(env, obj, "N", d);
-			case 8:	napi_set_named_property(env, obj, "anomalous_oxygen", d);
+			case 0:	napi_set_named_property(env, obj, "HE", val);
+			case 1:	napi_set_named_property(env, obj, "O", val);
+			case 2:	napi_set_named_property(env, obj, "N2", val);
+			case 3:	napi_set_named_property(env, obj, "O2", val);
+			case 4:	napi_set_named_property(env, obj, "AR", val);
+			case 5:	napi_set_named_property(env, obj, "total", val);
+			case 6:	napi_set_named_property(env, obj, "H", val);
+			case 7:	napi_set_named_property(env, obj, "N", val);
+			case 8:	napi_set_named_property(env, obj, "anomalous_oxygen", val);
 		}
 	}
+	napi_set_named_property(env, obj, "d", d);
 
 	napi_value t;
+	assert(napi_ok==napi_create_array_with_length(env, 2, &t));
+
 	for (n=0; n<2; n++){
-		assert(napi_ok==napi_create_double(env, output.t[n], &t));
+		assert(napi_ok==napi_create_double(env, output.t[n], &val));
+		assert(napi_ok==napi_set_element(env, t, n, val));
 		switch(n){
-			case 0:	napi_set_named_property(env, obj, "exospheric_temperature", t);
-			case 1:	napi_set_named_property(env, obj, "temperature", t);
+			case 0: napi_set_named_property(env, obj, "exospheric_temperature", val);	break;
+			case 1:	napi_set_named_property(env, obj, "temperature", val);				break;
 		}
 	}
+	napi_set_named_property(env, obj, "t", t);
 
 
 	return obj;
@@ -150,7 +169,7 @@ napi_value wrap_gt7d(napi_env env, napi_callback_info info) {
 
 napi_value init (napi_env env, napi_value exports) {
 
-  napi_property_descriptor desc = DECLARE_NAPI_METHOD("gtd7", wrap_gt7d);
+  napi_property_descriptor desc = DECLARE_NAPI_METHOD("gtd7", wrap_gt7);
   napi_define_properties(env, exports, 1, &desc);
   return exports;
 }
