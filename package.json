@@ -7,7 +7,8 @@
     "start": "node-gyp configure build",
     "install": "node-gyp rebuild",
     "clean": "node-gyp clean",
-    "test": "node nrlmsise-test.js"
+    "test": "node nrlmsise-test.js",
+    "docs": "node generate_docs.js"
   },
   "repository": {
     "type": "git",
@@ -16,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "jsdoc-to-markdown": "^5.0.3",
     "node-addon-api": "^2.0.0"
   },
   "gypfile": true,

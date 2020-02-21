@@ -1,5 +1,9 @@
 const nrlmsise = require('./build/Release/nrlmsise');
 
+/**
+ * NRLMSISE-00 for Node.js
+ * 
+ */
 class Nrlmsise {
 
 	constructor() {
