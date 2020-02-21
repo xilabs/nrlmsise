@@ -26,16 +26,16 @@ let Nrlmsise=require("nrlmsise");
 
 let n=new Nrlmsise();
 
-n.doy=172;
-n.year=0; /* without effect */
-n.sec=29000;
-n.alt=400;
-n.g_lat=60;
-n.g_long=-70;
-n.lst=16;
-n.f107A=150;
-n.f107=150;
-n.ap=4;
+n.doy=172;		/* day of year */
+n.year=0; 		/* year, currently ignored */
+n.sec=29000;	/* seconds in day (UT) */
+n.alt=400;		/* altitude in kilometers */
+n.g_lat=60;		/* geodetic latitude */
+n.g_long=-70;	/* seconds in day (UT) */
+n.lst=16;		/* local apparent solar time (hours), see note below */
+n.f107A=150;	/* 81 day average of F10.7 flux (centered on doy) */
+n.f107=150;		/* daily F10.7 flux for previous day */
+n.ap=4;			/* magnetic index(daily) */
 n.switches=[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];	// Actually unnecessary, since this is the default.  We could also use n.set_switch(n, val)
 
 console.log(JSON.stringify(n.gtd7()));
