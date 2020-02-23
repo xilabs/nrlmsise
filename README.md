@@ -1,16 +1,10 @@
 # NRLMSISE-00 for Node.js
-
-The NRLMSIS-00 empirical atmosphere model was developed by Mike Picone, Alan Hedin, and Doug Drob based on the MSISE90 model.
+NodeJS port of the NRLMSIS-00 empirical atmosphere model based on MSISE90 and developed by Mike Picone, Alan Hedin, and Doug Drob.
 
 ### Background
+The [original FORTRAN version](http://uap-www.nrl.navy.mil/models_web/msis/msis_home.htm) was ported to C by [Dominik Brodowski](http://www.brodo.de/english/pub/nrlmsise/) based on the Official Beta Release 2.0.  Using N-API and a little bit of magic, [his source files](git://git.linta.de/~brodo/nrlmsise-00.git) were used to create this NodeJS version.
 
-The authors of the NRLMSISE-00 model have released a FORTRAN version which is available at http://uap-www.nrl.navy.mil/models_web/msis/msis_home.htm
-Based on the Official Beta Release 1.0 (NRLMSISE-00.DIST12.TXT) Dominik Brodowski wrote an implementation in C which is available on http://www.brodo.de/english/pub/nrlmsise/ . This release is based on the Official Beta Release 2.0 
-Based on the C version, this Node port was created using source C files can be found at git://git.linta.de/~brodo/nrlmsise-00.git . The C port was converted to C++ and compiled into a NodeJS module using N-API.
-
-The MSISE90 model describes the neutral temperature and densities in Earth's atmosphere from ground to thermospheric heights. Below 72.5 km the model is primarily based on the MAP Handbook (Labitzke et al., 1985) tabulation of zonal average temperature and pressure by Barnett and Corney, which was also used for the CIRA-86. Below 20 km these data were supplemented with averages from the National Meteorological Center (NMC). In addition, pitot tube, falling sphere, and grenade sounder rocket measurements from 1947 to 1972 were taken into consideration. Above 72.5 km MSISE-90 is essentially a revised MSIS-86 model taking into account data derived from space shuttle flights and newer incoherent scatter results. For someone interested only in the
-thermosphere (above 120 km), the author recommends the MSIS-86 model. MSISE is also not the model of preference for specialized tropospheric work. It is rather for studies that reach across several atmospheric boundaries. (quoted from http://nssdc.gsfc.nasa.gov/space/model/atmos/nrlmsise00.html)
-
+"The MSISE90 model describes the neutral temperature and densities in Earth's atmosphere from ground to thermospheric heights. Below 72.5 km the model is primarily based on the MAP Handbook (Labitzke et al., 1985) tabulation of zonal average temperature and pressure by Barnett and Corney, which was also used for the CIRA-86. Below 20 km these data were supplemented with averages from the National Meteorological Center (NMC). In addition, pitot tube, falling sphere, and grenade sounder rocket measurements from 1947 to 1972 were taken into consideration. Above 72.5 km MSISE-90 is essentially a revised MSIS-86 model taking into account data derived from space shuttle flights and newer incoherent scatter results. For someone interested only in the thermosphere (above 120 km), the author recommends the MSIS-86 model. MSISE is also not the model of preference for specialized tropospheric work. It is rather for studies that reach across several atmospheric boundaries." - [NASA](http://nssdc.gsfc.nasa.gov/space/model/atmos/nrlmsise00.html)
 
 ### Installation and testing
 ```bash
