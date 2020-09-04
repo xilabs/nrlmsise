@@ -16,8 +16,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-  },
+  "dependencies": {},
   "gypfile": true,
   "devDependencies": {
     "jsdoc-to-markdown": "^5.0.3",
