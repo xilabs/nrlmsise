@@ -21,6 +21,6 @@
   "devDependencies": {
     "jsdoc-to-markdown": "^5.0.3",
     "node-gyp": "^6.1.0",
-    "printf": "^0.5.2"
+    "printf": "^0.6.1"
   }
 }
